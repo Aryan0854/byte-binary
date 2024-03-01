@@ -1,0 +1,58 @@
+import numpy as np 
+import pandas as pd 
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+import seaborn as sns
+data = pd.read_csv(r"C:\Users\chitrangi bhatnagar\Downloads\emotions.csv")
+sample = data.loc[0, 'fft_0_b':'fft_749_b']
+plt.style.use('seaborn')
+plt.figure(figsize=(17,10))
+plt.plot(range(len(sample)),sample)
+plt.title("Features fft_0_b through fft_749_b",weight='bold',color='red')
+plt.show()
+
+pos = data.loc[data["label"]=="POSITIVE"]
+sample_pos = pos.loc[2, 'fft_0_b':'fft_749_b']
+neg = data.loc[data["label"]=="NEGATIVE"]
+sample_neg = neg.loc[0, 'fft_0_b':'fft_749_b']
+neu = data.loc[data["label"]=="NEUTRAL"]
+sample_neu = neu.loc[1, 'fft_0_b':'fft_749_b']
+plt.style.use('seaborn')
+fig, axs = plt.subplots(3, figsize=(17, 10))
+fig.subplots_adjust(top=0.9, hspace=0.5)
+axs[0].plot(range(len(sample_pos)), sample_pos)
+axs[0].set_title('Positive')
+axs[1].plot(range(len(sample_neg)), sample_neg)
+axs[1].set_title('Negtive')
+axs[2].plot(range(len(sample_neu)), sample_neu)
+axs[2].set_title('Neutral')
+plt.show()
+target = data['label']
+data1 = data.drop(['label'], axis=1)
+scaler = StandardScaler()
+data2 = pd.DataFrame(scaler.fit_transform(data1))
+data2
+from sklearn.preprocessing import LabelEncoder
+enc = LabelEncoder()
+y1 = pd.DataFrame(enc.fit_transform(target))
+y1
+X_train,X_test, y_train, y_test = train_test_split(data2, y1, train_size = 0.8)
+from sklearn.neural_network import MLPClassifier
+from sklearn.impute import SimpleImputer
+imputer = SimpleImputer(strategy='mean')
+X_train_imputed = imputer.fit_transform(X_train)
+clf.fit(X_train_imputed, y_train)
+accuracy = clf.score(X_test, y_test)
+print(f'Accuracy: {accuracy}')
+from sklearn.metrics import confusion_matrix,classification_report
+from sklearn.metrics import ConfusionMatrixDisplay
+y_pred = clf.predict(X_test)
+cm = confusion_matrix(y_test, y_pred)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=np.unique(y_test))
+disp.plot(cmap=plt.cm.Blues)
+disp.ax_.set_title('Confusion Matrix')
+
+plt.show()
+clr = classification_report(y_test, y_pred, target_names={"Neutral","Positive","Negative"})
+print("Classification Report:\n----------------------\n", clr)
